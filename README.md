@@ -1,3 +1,8 @@
+# react_sudoku
+This is an implementation of Sudoku play, generation, and solving, in React.
+
+This project uses Create React App and Material UI.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
