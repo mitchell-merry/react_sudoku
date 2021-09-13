@@ -1,0 +1,10 @@
+@import './globals.scss';
+
+body { 
+    background-color: $BORDER_SOFT;
+}
+
+.app {
+    display: flex;
+    justify-content: center;
+}

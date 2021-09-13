@@ -1,0 +1,35 @@
+@import '../globals.scss';
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid $BORDER_HARD;
+    border-right: 1px solid $BORDER_HARD;
+    margin-top: 100px;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: white;
+
+    font-size: $CELL_SIZE*0.8;
+
+    width: $CELL_SIZE;
+    height: $CELL_SIZE;
+
+    user-select: none;
+    cursor: pointer;
+}
+
+.cell_left_border_soft { border-left: 1px solid $BORDER_SOFT; }
+.cell_top_border_soft { border-top: 1px solid $BORDER_SOFT; }
+.cell_left_border_hard { border-left: 1px solid $BORDER_HARD; }
+.cell_top_border_hard { border-top: 1px solid $BORDER_HARD; }
