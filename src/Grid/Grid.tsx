@@ -22,7 +22,7 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
 
     const handleKeyDown = (e: KeyboardEvent): void => {
         const val = Number(e.key);
-        if(!isNaN(val)) {
+        if(!isNaN(val) && e.key !== ' ') {
             e.preventDefault();    
             setCellValue(selectedCell[0], selectedCell[1], val);
         } else if(Object.keys(arrowToNeighbour).includes(e.key)) {
@@ -33,6 +33,14 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
             })
         } else if(e.key === 'Delete' || e.key === 'Backspace') {
             setCellValue(selectedCell[0], selectedCell[1], null);
+        } else if(e.key === ' ') {
+            setGrid(curr => {
+                const newGrid = Sudoku.copyGrid(curr);
+                Sudoku.fillGrid(newGrid, false, false);
+                return newGrid;
+            });
+        } else {
+            console.log(e.key);
         }
     }
 
