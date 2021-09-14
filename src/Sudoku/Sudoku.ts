@@ -54,35 +54,6 @@ const getBox = (grid: IGrid, boxRow: number, boxCol: number): ICell[] => {
     return o;
 };
 
-export const validGrid = (grid: IGrid): boolean => {
-    // validate rows
-    for(let row = 0; row < grid.N*grid.N; row++) {
-        if(!isUniqueCellSet(getRow(grid, row))) return false;
-    }
-
-    // validate cols
-    for(let col = 0; col < grid.N*grid.N; col++) {
-        if(!isUniqueCellSet(getCol(grid, col))) return false;
-    }
-
-    // validate boxes
-    for(let i = 0; i < grid.N*grid.N; i++) {
-        if(!isUniqueCellSet(getBox(grid, Math.floor(i/grid.N), i%grid.N))) return false;
-    }
-
-    return true;
-}
-
-// get co-ordinates of first empty cell in a grid (or null)
-export const getEmpty = (grid: IGrid): [number, number] | null => {
-    for(let row = 0; row < grid.grid.length; row++) {
-        for(let col = 0; col < grid.grid[row].length; col++) {
-            if(grid.grid[row][col].value === null) return [row, col];
-        }
-    }
-    return null;
-}
-
 export const getCellBox = (cell: Coordinate, N: number): Coordinate => {
     return [ Math.floor(cell[0]/N), Math.floor(cell[1]/N) ];
 }
@@ -121,6 +92,49 @@ export const getAllCoordinates = (grid: IGrid): Coordinate[] => {
     return Array.from({length: grid.N * grid.N*grid.N * grid.N}, (_, i) => [Math.floor(i/(grid.N*grid.N)), i%(grid.N*grid.N)]);
 }
 
+export const validGrid = (grid: IGrid): boolean => {
+    // validate rows
+    for(let row = 0; row < grid.N*grid.N; row++) {
+        if(!isUniqueCellSet(getRow(grid, row))) return false;
+    }
+
+    // validate cols
+    for(let col = 0; col < grid.N*grid.N; col++) {
+        if(!isUniqueCellSet(getCol(grid, col))) return false;
+    }
+
+    // validate boxes
+    for(let i = 0; i < grid.N*grid.N; i++) {
+        if(!isUniqueCellSet(getBox(grid, Math.floor(i/grid.N), i%grid.N))) return false;
+    }
+
+    return true;
+}
+
+const valueFrequencyInSet = (arr: ICell[], value: number | null): number => {
+    let o = 0;
+    arr.forEach(i => {
+        if(i.value === value) o++;
+    })
+    
+    return o;
+}
+
+export const isCoordinateValidOnGrid = (grid: IGrid, coord: Coordinate): boolean => {
+    return valueFrequencyInSet(getRow(grid, coord[0]), getValueAtCoordinate(coord, grid)) <= 1
+        && valueFrequencyInSet(getCol(grid, coord[1]), getValueAtCoordinate(coord, grid)) <= 1
+        && valueFrequencyInSet(getBox(grid, getCellBox(coord, grid.N)[0], getCellBox(coord, grid.N)[1]), getValueAtCoordinate(coord, grid)) <= 1;
+}
+
+// get co-ordinates of first empty cell in a grid (or null)
+export const getEmpty = (grid: IGrid): [number, number] | null => {
+    for(let row = 0; row < grid.grid.length; row++) {
+        for(let col = 0; col < grid.grid[row].length; col++) {
+            if(grid.grid[row][col].value === null) return [row, col];
+        }
+    }
+    return null;
+}
 export const clearGridOfState = (grid: IGrid, state: CellState) => {
     grid.grid.forEach((row, rowIdx) => {
         grid.grid[rowIdx].forEach((cell, colIdx) => {
@@ -193,10 +207,12 @@ export const generateGrid = (grid: IGrid, emptyCells: number): void => {
         } else {
             // Decrease the number of empty cells (remaining)
             emptyCells--;
+
             // Clear the board of solved cells (they would have been filled in when we checked)
             clearGridOfState(grid, 'solved');
         }
 
+        // Remove the option
         options.shift();
     }
 

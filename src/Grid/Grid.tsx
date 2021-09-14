@@ -75,6 +75,9 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
                             : Sudoku.cellValuesEqual(selectedCell, [rowIdx, colIdx], grid) ? 'number'
                             : Sudoku.cellsInSameRegion(selectedCell, [rowIdx, colIdx], grid.N) ? 'region'
                             : null;
+
+                const state = Sudoku.isCoordinateValidOnGrid(grid, [rowIdx, colIdx]) ? cell.state
+                            : 'invalid';
                             
                 let cn = classNames(
                     // Base style
@@ -86,8 +89,9 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
                     {[styles.selected_region]: shade === 'region'},
 
                     // Cell type
-                    {[styles.cell_static]: cell.state === 'static'},
-                    {[styles.cell_solved]: cell.state === 'solved'},
+                    {[styles.cell_static]: state === 'static'},
+                    {[styles.cell_solved]: state === 'solved'},
+                    {[styles.cell_invalid]: state === 'invalid'},
 
                     // Borders
                     {[styles.cell_top_border_soft]: rowIdx % grid.N !== 0},

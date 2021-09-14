@@ -19,7 +19,7 @@
     align-items: center;
 
     background-color: white;
-    color: blue;
+    color: $DEFAULT_CELL;
 
     font-size: $CELL_SIZE*0.8;
 
@@ -36,7 +36,7 @@
 
 .cell_static { color: $STATIC_CELL; }
 .cell_solved { color: $SOLVED_CELL; }
-// .cell_static { color: black; }
+.cell_invalid { color: $INVALID_CELL; }
 
 .cell_left_border_soft { border-left: 1px solid $BORDER_SOFT; }
 .cell_top_border_soft { border-top: 1px solid $BORDER_SOFT; }
