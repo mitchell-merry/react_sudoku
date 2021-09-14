@@ -1,6 +1,10 @@
 // ICell, IGrid, I Fard, I Shid
 export interface ICell {
     value: number | null;
+    // Static means generated - unchanging
+    // Solved means when you press "solve" it was filled in for you
+    // Null means either empty or filled by the user (default)
+    state: 'static' | 'solved' | null;
 }
 
 export interface IGrid {
@@ -94,6 +98,15 @@ export const coordinatesEqual = (one: Coordinate, two: Coordinate): boolean => {
     return one[0] === two[0] && one[1] === two[1];
 }
 
+const getValueAtCoordinate = (coord: Coordinate, grid: IGrid): number | null => {
+    return grid.grid[coord[0]][coord[1]].value;
+}
+
+export const cellValuesEqual = (one: Coordinate, two: Coordinate, grid: IGrid): boolean => {
+    const [valueOne, valueTwo] = [getValueAtCoordinate(one, grid), getValueAtCoordinate(two, grid)]
+    return valueOne !== null && valueOne === valueTwo;
+}
+
 // in place and returns the array
 export const shuffle = (arr: any[]): any[] => {
     for (let i = arr.length-1; i >= 0; i--) {
@@ -103,7 +116,7 @@ export const shuffle = (arr: any[]): any[] => {
     return arr;
 }
 
-export const solveGrid = (grid: IGrid, random: boolean, countAll: boolean): number => {
+export const fillGrid = (grid: IGrid, generate: boolean, countAll: boolean): number => {
     // TODO: keep track of empty cells in IGrid rather than re-calcing on every recurse
     const empty = getEmpty(grid);
     if(empty === null) return 1;
@@ -113,27 +126,34 @@ export const solveGrid = (grid: IGrid, random: boolean, countAll: boolean): numb
 
     // possible values for cell
     const options: number[] = Array.from({length: grid.N*grid.N}, (_, i) => i+1); 
-    if(random) shuffle(options);
+    if(generate) shuffle(options);
 
     for(const option of options) {
-        grid.grid[row][col].value = option;
+        grid.grid[row][col] = {
+            value: option,
+            state: generate ? 'static' : 'solved'
+        };
 
         if(!validGrid(grid)) continue;
-        const sols = solveGrid(grid, random, countAll);
+        const sols = fillGrid(grid, generate, countAll);
         
         if(!countAll && sols === 1) return sols;
 
         solutionsFromHere += sols;
     }
 
-    grid.grid[row][col].value = null;
+    grid.grid[row][col] = {
+        value: null,
+        state: null
+    };
+    
     return solutionsFromHere;
 }
 
 export const generateGrid = (grid: IGrid, emptyCells: number) => {
 
     // Generate solved state and work backwards
-    console.log(solveGrid(grid, false, true));
+    console.log(fillGrid(grid, false, true));
 
 
 }
@@ -142,7 +162,7 @@ export const instantiateGrid = (N: number): IGrid => {
     return {
         N,
         grid: Array.from({length: N*N}, (_, row) => (
-            Array.from({length: N*N}, (_, col) => ({value: null}))
+            Array.from({length: N*N}, (_, col) => ({ value: null, state: null }))
         ))
     }
 }

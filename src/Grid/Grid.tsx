@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { cellsInSameRegion, Coordinate, coordinatesEqual, generateGrid, instantiateGrid, solveGrid } from "../Sudoku/Sudoku";
+import { cellsInSameRegion, Coordinate, coordinatesEqual, instantiateGrid, cellValuesEqual } from "../Sudoku/Sudoku";
 import styles from './Grid.module.scss';
 var classNames = require('classnames');
 
@@ -27,20 +27,24 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
     return <div className={styles.grid}>
         {grid.grid.map((row, rowIdx) => <div className={styles.row} key={rowIdx}>{
             row.map((cell, colIdx) => {
-                // state === 2 - selected coordinate
-                // state === 1 - same region (row, col, or box)
-                // state === 0 - unrelated cell
-                const state = coordinatesEqual(selectedCell, [rowIdx, colIdx]) ? 2 
-                            : (cellsInSameRegion(selectedCell, [rowIdx, colIdx], grid.N) ? 1
-                            : 0);
+                
+                const shade = coordinatesEqual(selectedCell, [rowIdx, colIdx]) ? 'coordinate'
+                            : cellValuesEqual(selectedCell, [rowIdx, colIdx], grid) ? 'number'
+                            : cellsInSameRegion(selectedCell, [rowIdx, colIdx], grid.N) ? 'region'
+                            : null;
                             
                 let cn = classNames(
                     // Base style
                     styles.cell,
 
                     // Selected cell and region
-                    {[styles.selected_region]: state === 1},
-                    {[styles.selected_cell]: state === 2},
+                    {[styles.selected_cell]: shade === 'coordinate'},
+                    {[styles.selected_number]: shade === 'number'},
+                    {[styles.selected_region]: shade === 'region'},
+
+                    // Cell type
+                    {[styles.cell_static]: cell.state === 'static'},
+                    {[styles.cell_solved]: cell.state === 'solved'},
 
                     // Borders
                     {[styles.cell_top_border_soft]: rowIdx % grid.N !== 0},

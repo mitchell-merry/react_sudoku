@@ -19,6 +19,7 @@
     align-items: center;
 
     background-color: white;
+    color: blue;
 
     font-size: $CELL_SIZE*0.8;
 
@@ -31,6 +32,11 @@
 
 .selected_cell { background-color: $SELECTED_CELL; }
 .selected_region { background-color: $SELECTED_REGION; }
+.selected_number { background-color: $SELECTED_NUMBER; }
+
+.cell_static { color: $STATIC_CELL; }
+.cell_solved { color: $SOLVED_CELL; }
+// .cell_static { color: black; }
 
 .cell_left_border_soft { border-left: 1px solid $BORDER_SOFT; }
 .cell_top_border_soft { border-top: 1px solid $BORDER_SOFT; }
