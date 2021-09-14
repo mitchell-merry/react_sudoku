@@ -5,7 +5,7 @@
     flex-direction: column;
     border-bottom: 1px solid $BORDER_HARD;
     border-right: 1px solid $BORDER_HARD;
-    margin-top: 100px;
+    margin-top: 10px;
 }
 
 .row {
@@ -27,6 +27,14 @@
 
     user-select: none;
     cursor: pointer;
+}
+
+.selected_cell {
+    background-color: $SELECTED_CELL;
+}
+
+.selected_region {
+    background-color: $SELECTED_REGION;
 }
 
 .cell_left_border_soft { border-left: 1px solid $BORDER_SOFT; }
