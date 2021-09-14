@@ -31,6 +31,8 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
                 if(Sudoku.coordOOBOnGrid(newCell, grid)) return currentSelectedCell
                 return newCell;
             })
+        } else if(e.key === 'Delete' || e.key === 'Backspace') {
+            setCellValue(selectedCell[0], selectedCell[1], null);
         }
     }
 
@@ -52,7 +54,7 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
         setSelectedCell(currentCell => [row, col]);
     }
 
-    const setCellValue = (row: number, col: number, value: number): void => {
+    const setCellValue = (row: number, col: number, value: number | null): void => {
         setGrid(curr => {
             const newGrid = Sudoku.copyGrid(curr);
 
