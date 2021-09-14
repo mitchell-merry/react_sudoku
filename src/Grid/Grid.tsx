@@ -48,6 +48,7 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
                     {[styles.cell_top_border_hard]: rowIdx % grid.N === 0},
                     {[styles.cell_left_border_hard]: colIdx % grid.N === 0}, 
                 );
+                
                 return <div className={cn} key={`${rowIdx} ${colIdx}`} onMouseDown={() => selectCell(rowIdx, colIdx)}>
                     {cell.value}
                 </div>}
