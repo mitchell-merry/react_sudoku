@@ -37,11 +37,12 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
     useEffect(() => {
         setGrid(curr => {
             const newGrid = Sudoku.copyGrid(curr);
-            Sudoku.fillGrid(newGrid, true, false);
+            Sudoku.generateGrid(newGrid, 45);
             return newGrid;
         });
+    }, [])
 
-
+    useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
 
         return () => document.removeEventListener('keydown', handleKeyDown)
@@ -57,7 +58,7 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
 
             if(newGrid.grid[row][col].state !== 'static') {
                 const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
-                if(currVal === value) newGrid.grid[row][col].value = null;
+                if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
                 else newGrid.grid[row][col].value = value;
             }
             

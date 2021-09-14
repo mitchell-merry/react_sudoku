@@ -1,10 +1,12 @@
+export type CellState = 'static' | 'solved' | null;
+
 // ICell, IGrid, I Fard, I Shid
 export interface ICell {
     value: number | null;
     // Static means generated - unchanging
     // Solved means when you press "solve" it was filled in for you
     // Null means either empty or filled by the user (default)
-    state: 'static' | 'solved' | null;
+    state: CellState;
 }
 
 export interface IGrid {
@@ -115,6 +117,18 @@ export const sumCoordinates = (one: Coordinate, two: Coordinate): Coordinate => 
     return [one[0] + two[0], one[1] + two[1]];
 }
 
+export const getAllCoordinates = (grid: IGrid): Coordinate[] => {
+    return Array.from({length: grid.N * grid.N*grid.N * grid.N}, (_, i) => [Math.floor(i/(grid.N*grid.N)), i%(grid.N*grid.N)]);
+}
+
+export const clearGridOfState = (grid: IGrid, state: CellState) => {
+    grid.grid.forEach((row, rowIdx) => {
+        grid.grid[rowIdx].forEach((cell, colIdx) => {
+            if(grid.grid[rowIdx][colIdx].state === state) grid.grid[rowIdx][colIdx] = {value: null, state: null}; 
+        });
+    });
+}
+
 // in place and returns the array
 export const shuffle = (arr: any[]): any[] => {
     for (let i = arr.length-1; i >= 0; i--) {
@@ -158,12 +172,35 @@ export const fillGrid = (grid: IGrid, generate: boolean, countAll: boolean): num
     return solutionsFromHere;
 }
 
-export const generateGrid = (grid: IGrid, emptyCells: number) => {
+export const generateGrid = (grid: IGrid, emptyCells: number): void => {
 
     // Generate solved state and work backwards
-    console.log(fillGrid(grid, false, true));
+    fillGrid(grid, true, false);
 
+    const options: Coordinate[] = shuffle(getAllCoordinates(grid));
+    
+    // While there are more empty cells to remove and we haven't run out of options
+    while(emptyCells > 0 && options.length > 0) {
 
+        // Remove the cell at our first (random) location and store temporarily
+        const temp = grid.grid[options[0][0]][options[0][1]].value;
+        grid.grid[options[0][0]][options[0][1]] = {value: null, state: null};
+        
+        // Not a valid solution
+        if(fillGrid(grid, false, true) !== 1) {
+            // Restore value if it introduces ambiguity
+            grid.grid[options[0][0]][options[0][1]] = {value: temp, state: 'static'};
+        } else {
+            // Decrease the number of empty cells (remaining)
+            emptyCells--;
+            // Clear the board of solved cells (they would have been filled in when we checked)
+            clearGridOfState(grid, 'solved');
+        }
+
+        options.shift();
+    }
+
+    console.log(grid)
 }
 
 export const instantiateGrid = (N: number): IGrid => {
