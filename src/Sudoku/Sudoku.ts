@@ -72,7 +72,7 @@ export const validGrid = (grid: IGrid): boolean => {
 }
 
 // get co-ordinates of first empty cell in a grid (or null)
-const getEmpty = (grid: IGrid): [number, number] | null => {
+export const getEmpty = (grid: IGrid): [number, number] | null => {
     for(let row = 0; row < grid.grid.length; row++) {
         for(let col = 0; col < grid.grid[row].length; col++) {
             if(grid.grid[row][col].value === null) return [row, col];
@@ -81,11 +81,11 @@ const getEmpty = (grid: IGrid): [number, number] | null => {
     return null;
 }
 
-const getCellBox = (cell: Coordinate, N: number): Coordinate => {
+export const getCellBox = (cell: Coordinate, N: number): Coordinate => {
     return [ Math.floor(cell[0]/N), Math.floor(cell[1]/N) ];
 }
 
-const inSameBox = (one: Coordinate, two: Coordinate, N: number): boolean => {
+export const inSameBox = (one: Coordinate, two: Coordinate, N: number): boolean => {
     const [boxOne, boxTwo] = [getCellBox(one, N), getCellBox(two, N)];
     return boxOne[0] === boxTwo[0] && boxOne[1] === boxTwo[1];
 }
@@ -98,13 +98,21 @@ export const coordinatesEqual = (one: Coordinate, two: Coordinate): boolean => {
     return one[0] === two[0] && one[1] === two[1];
 }
 
-const getValueAtCoordinate = (coord: Coordinate, grid: IGrid): number | null => {
+export const getValueAtCoordinate = (coord: Coordinate, grid: IGrid): number | null => {
     return grid.grid[coord[0]][coord[1]].value;
 }
 
 export const cellValuesEqual = (one: Coordinate, two: Coordinate, grid: IGrid): boolean => {
     const [valueOne, valueTwo] = [getValueAtCoordinate(one, grid), getValueAtCoordinate(two, grid)]
     return valueOne !== null && valueOne === valueTwo;
+}
+
+export const coordOOBOnGrid = (coord: Coordinate, grid: IGrid): boolean => {
+    return coord[0] < 0 || coord[1] < 0 || coord[0] >= grid.grid.length || coord[1] >= grid.grid[coord[0]].length;
+}
+
+export const sumCoordinates = (one: Coordinate, two: Coordinate): Coordinate => {
+    return [one[0] + two[0], one[1] + two[1]];
 }
 
 // in place and returns the array
@@ -164,5 +172,12 @@ export const instantiateGrid = (N: number): IGrid => {
         grid: Array.from({length: N*N}, (_, row) => (
             Array.from({length: N*N}, (_, col) => ({ value: null, state: null }))
         ))
+    }
+}
+
+export const copyGrid = (grid: IGrid): IGrid => {
+    return {
+        N: grid.N, 
+        grid: grid.grid.map(a => a.slice())
     }
 }
