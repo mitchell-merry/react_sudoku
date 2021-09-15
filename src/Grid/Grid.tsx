@@ -7,6 +7,8 @@ var classNames = require('classnames');
 export interface GridProps {
     N: number;
     controlFunctions: React.MutableRefObject<IControlFunctions>;
+    editMode: boolean;
+    toggleEditMode: () => void;
 }
 
 interface ATM { [key: string]: Sudoku.Coordinate }
@@ -18,10 +20,9 @@ const arrowToNeighbour: ATM = {
     'ArrowRight':   [0, 1],
 };
 
-export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
+export const Grid: React.FC<GridProps> = ({ N, controlFunctions, editMode, toggleEditMode }) => {
     const [ grid, setGrid ] = useState(Sudoku.instantiateGrid(N))
     const [ selectedCell, setSelectedCell ] = useState<Sudoku.Coordinate>([0, 0]);
-    const [ editModeEnabled, setEditModeEnabled ] = useState<boolean>(true);
     
     const generateNewGrid = (): void => {
         setGrid(curr => {
@@ -39,24 +40,29 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
         });
     }
 
+    const moveAccordingToKey = (key: string): void => {
+        setSelectedCell(currentSelectedCell => {
+            const newCell = Sudoku.sumCoordinates(currentSelectedCell, arrowToNeighbour[key]);
+            if(Sudoku.coordOOBOnGrid(newCell, grid)) return currentSelectedCell;
+            return newCell;
+        })
+    }
+
     const handleKeyDown = (e: KeyboardEvent): void => {
         const val = Number(e.key);
-        if(!isNaN(val) && e.key !== ' ') {
-            e.preventDefault();    
-            setCellValue(selectedCell[0], selectedCell[1], val);
-        } else if(Object.keys(arrowToNeighbour).includes(e.key)) {
-            setSelectedCell(currentSelectedCell => {
-                const newCell = Sudoku.sumCoordinates(currentSelectedCell, arrowToNeighbour[e.key]);
-                if(Sudoku.coordOOBOnGrid(newCell, grid)) return currentSelectedCell
-                return newCell;
-            })
-        } 
+        let prevent = true;
+
+        if(Object.keys(arrowToNeighbour).includes(e.key)) moveAccordingToKey(e.key);
+        else if(!isNaN(val) && e.key !== ' ') setCellValue(selectedCell[0], selectedCell[1], val); 
         else if(e.key === 'Delete' || e.key === 'Backspace') setCellValue(selectedCell[0], selectedCell[1], null);
         else if(e.key === ' ') solveGrid(); 
-        else if(e.key === 'e') setEditModeEnabled(e => !e);
+        else if(e.key === 'e') toggleEditMode();
         else {
+            prevent  = false;
             // console.log(e.key);
         }
+
+        if(prevent) e.preventDefault();
     }
 
     useEffect(() => { generateNewGrid(); }, [])
@@ -65,7 +71,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
         document.addEventListener('keydown', handleKeyDown);
 
         return () => document.removeEventListener('keydown', handleKeyDown)
-    }, [ selectedCell, editModeEnabled ]);
+    }, [ selectedCell, editMode ]);
 
     const selectCell = (row: number, col: number): void => {
         setSelectedCell(currentCell => [row, col]);
@@ -77,7 +83,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
 
             if(newGrid.grid[row][col].state === 'static') return newGrid;
             
-            if(!editModeEnabled) {
+             if(!editMode) {
                 const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
                 if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
                 else newGrid.grid[row][col].value = value;
@@ -92,7 +98,6 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
     controlFunctions.current.generate = generateNewGrid;
     controlFunctions.current.solve = solveGrid;
     controlFunctions.current.loadCell = (value: number) => { setCellValue(selectedCell[0], selectedCell[1], value); };
-    controlFunctions.current.setEdit = (val: boolean) => { setEditModeEnabled(val); };
 
     // Row by row
     return <div className={styles.grid}>
