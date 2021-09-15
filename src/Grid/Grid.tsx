@@ -23,6 +23,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
     const [ selectedCell, setSelectedCell ] = useState<Sudoku.Coordinate>([0, 0]);
     const [ editModeEnabled, setEditModeEnabled ] = useState<boolean>(true);
     
+    console.log(editModeEnabled)
     const generateNewGrid = (): void => {
         setGrid(curr => {
             const newGrid = Sudoku.instantiateGrid(curr.N);
@@ -53,8 +54,9 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
         } 
         else if(e.key === 'Delete' || e.key === 'Backspace') setCellValue(selectedCell[0], selectedCell[1], null);
         else if(e.key === ' ') solveGrid(); 
+        else if(e.key === 'e') setEditModeEnabled(e => !e);
         else {
-            // console.log(e.key);
+            console.log(e.key);
         }
     }
 
@@ -64,7 +66,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
         document.addEventListener('keydown', handleKeyDown);
 
         return () => document.removeEventListener('keydown', handleKeyDown)
-    }, [ selectedCell, ]);
+    }, [ selectedCell, editModeEnabled ]);
 
     const selectCell = (row: number, col: number): void => {
         setSelectedCell(currentCell => [row, col]);
@@ -75,7 +77,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
             const newGrid = Sudoku.copyGrid(curr);
 
             if(newGrid.grid[row][col].state !== 'static') {
-
+                console.log(editModeEnabled)
                 if(!editModeEnabled) {
                     const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
                     if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
@@ -91,7 +93,8 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
 
     controlFunctions.current.generate = generateNewGrid;
     controlFunctions.current.solve = solveGrid;
-    controlFunctions.current.loadCell = (value: number) => { setCellValue(selectedCell[0], selectedCell[1], value); }
+    controlFunctions.current.loadCell = (value: number) => { setCellValue(selectedCell[0], selectedCell[1], value); };
+    controlFunctions.current.setEdit = (val: boolean) => { setEditModeEnabled(val); };
 
     // Row by row
     return <div className={styles.grid}>

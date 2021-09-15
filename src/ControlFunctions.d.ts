@@ -3,4 +3,5 @@ export interface IControlFunctions {
     generate?: () => void;
     solve?: () => void;
     reset?: () => void;
+    setEdit?: (val: boolean) => void;
 };

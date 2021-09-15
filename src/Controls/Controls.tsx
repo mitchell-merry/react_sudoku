@@ -11,8 +11,6 @@ export interface ControlsProps {
 
 export const Controls: React.FC<ControlsProps> = ({ N, controlFunctions }) => {
     let cn = classNames(styles.grid);
-    
-    
 
     return <div className={cn}>
         <div className={styles.row}>
