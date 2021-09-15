@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { IControlFunctions } from "../ControlFunctions";
 import * as Sudoku from "../Sudoku/Sudoku";
 import styles from './Grid.module.scss';
 var classNames = require('classnames');
 
 export interface GridProps {
     N: number;
+    controlFunctions: React.MutableRefObject<IControlFunctions>;
 }
 
 interface ATM { [key: string]: Sudoku.Coordinate }
@@ -16,9 +18,25 @@ const arrowToNeighbour: ATM = {
     'ArrowRight':   [0, 1],
 };
 
-export const Grid: React.FC<GridProps> = ({ N }) => {
+export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
     const [ grid, setGrid ] = useState(Sudoku.instantiateGrid(N))
     const [ selectedCell, setSelectedCell ] = useState<Sudoku.Coordinate>([0, 0]);
+    
+    const generateNewGrid = (): void => {
+        setGrid(curr => {
+            const newGrid = Sudoku.instantiateGrid(curr.N);
+            Sudoku.generateGrid(newGrid, 45);
+            return newGrid;
+        });
+    }
+
+    const solveGrid = (): void => {
+        setGrid(curr => {
+            const newGrid = Sudoku.copyGrid(curr);
+            Sudoku.fillGrid(newGrid, false, false);
+            return newGrid;
+        });
+    }
 
     const handleKeyDown = (e: KeyboardEvent): void => {
         const val = Number(e.key);
@@ -31,26 +49,14 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
                 if(Sudoku.coordOOBOnGrid(newCell, grid)) return currentSelectedCell
                 return newCell;
             })
-        } else if(e.key === 'Delete' || e.key === 'Backspace') {
-            setCellValue(selectedCell[0], selectedCell[1], null);
-        } else if(e.key === ' ') {
-            setGrid(curr => {
-                const newGrid = Sudoku.copyGrid(curr);
-                Sudoku.fillGrid(newGrid, false, false);
-                return newGrid;
-            });
-        } else {
+        } else if(e.key === 'Delete' || e.key === 'Backspace') setCellValue(selectedCell[0], selectedCell[1], null);
+        else if(e.key === ' ') solveGrid(); 
+        else {
             console.log(e.key);
         }
     }
 
-    useEffect(() => {
-        setGrid(curr => {
-            const newGrid = Sudoku.copyGrid(curr);
-            Sudoku.generateGrid(newGrid, 45);
-            return newGrid;
-        });
-    }, [])
+    useEffect(() => { generateNewGrid(); }, [])
 
     useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
@@ -75,6 +81,10 @@ export const Grid: React.FC<GridProps> = ({ N }) => {
             return newGrid;
         });
     }
+
+    controlFunctions.current.generate = generateNewGrid;
+    controlFunctions.current.solve = solveGrid;
+    controlFunctions.current.loadCell = (value: number) => { setCellValue(selectedCell[0], selectedCell[1], value); }
 
     // Row by row
     return <div className={styles.grid}>
