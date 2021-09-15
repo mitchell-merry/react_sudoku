@@ -23,7 +23,6 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
     const [ selectedCell, setSelectedCell ] = useState<Sudoku.Coordinate>([0, 0]);
     const [ editModeEnabled, setEditModeEnabled ] = useState<boolean>(true);
     
-    console.log(editModeEnabled)
     const generateNewGrid = (): void => {
         setGrid(curr => {
             const newGrid = Sudoku.instantiateGrid(curr.N);
@@ -56,7 +55,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
         else if(e.key === ' ') solveGrid(); 
         else if(e.key === 'e') setEditModeEnabled(e => !e);
         else {
-            console.log(e.key);
+            // console.log(e.key);
         }
     }
 
@@ -76,15 +75,14 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
         setGrid(curr => {
             const newGrid = Sudoku.copyGrid(curr);
 
-            if(newGrid.grid[row][col].state !== 'static') {
-                console.log(editModeEnabled)
-                if(!editModeEnabled) {
-                    const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
-                    if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
-                    else newGrid.grid[row][col].value = value;
-                } else if(value !== null && value !== 0) {
-                    newGrid.grid[row][col].marks[value-1] = !newGrid.grid[row][col].marks[value-1];
-                }
+            if(newGrid.grid[row][col].state === 'static') return newGrid;
+            
+            if(!editModeEnabled) {
+                const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
+                if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
+                else newGrid.grid[row][col].value = value;
+            } else if(value !== null && value !== 0) {
+                newGrid.grid[row][col].marks[value-1] = !newGrid.grid[row][col].marks[value-1];
             }
             
             return newGrid;
@@ -131,9 +129,9 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
                 );
                 
                 return <div className={cn} key={`${rowIdx} ${colIdx}`} onMouseDown={() => selectCell(rowIdx, colIdx)}>
-                    {cell.value !== null ? cell.value : Array.from({ length: grid.N }, (_, row) => <div className={styles.mark_row}>
-                        {Array.from({ length: grid.N }, (_, col) => <div className={styles.mark_cell}>
-                            {cell.marks[row*grid.N+col] ? (row*grid.N+col)+1 : ' '}
+                    {cell.value !== null ? cell.value : Array.from({ length: grid.N }, (_, markRow) => <div className={styles.mark_row} key={`${rowIdx} ${colIdx} ${markRow}`}>
+                        {Array.from({ length: grid.N }, (_, markCol) => <div className={styles.mark_cell} key={`${rowIdx} ${colIdx} ${markRow} ${markCol}`}>
+                            {cell.marks[markRow*grid.N+markCol] ? (markRow*grid.N+markCol)+1 : ' '}
                         </div>)}
                     </div>)}
                 </div>}

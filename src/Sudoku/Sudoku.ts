@@ -221,8 +221,6 @@ export const generateGrid = (grid: IGrid, emptyCells: number): void => {
         // Remove the option
         options.shift();
     }
-
-    console.log(grid)
 }
 
 export const instantiateGrid = (N: number): IGrid => {
