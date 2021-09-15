@@ -21,6 +21,7 @@ const arrowToNeighbour: ATM = {
 export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
     const [ grid, setGrid ] = useState(Sudoku.instantiateGrid(N))
     const [ selectedCell, setSelectedCell ] = useState<Sudoku.Coordinate>([0, 0]);
+    const [ editModeEnabled, setEditModeEnabled ] = useState<boolean>(true);
     
     const generateNewGrid = (): void => {
         setGrid(curr => {
@@ -49,10 +50,11 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
                 if(Sudoku.coordOOBOnGrid(newCell, grid)) return currentSelectedCell
                 return newCell;
             })
-        } else if(e.key === 'Delete' || e.key === 'Backspace') setCellValue(selectedCell[0], selectedCell[1], null);
+        } 
+        else if(e.key === 'Delete' || e.key === 'Backspace') setCellValue(selectedCell[0], selectedCell[1], null);
         else if(e.key === ' ') solveGrid(); 
         else {
-            console.log(e.key);
+            // console.log(e.key);
         }
     }
 
@@ -73,9 +75,14 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
             const newGrid = Sudoku.copyGrid(curr);
 
             if(newGrid.grid[row][col].state !== 'static') {
-                const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
-                if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
-                else newGrid.grid[row][col].value = value;
+
+                if(!editModeEnabled) {
+                    const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
+                    if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
+                    else newGrid.grid[row][col].value = value;
+                } else if(value !== null && value !== 0) {
+                    newGrid.grid[row][col].marks[value-1] = !newGrid.grid[row][col].marks[value-1];
+                }
             }
             
             return newGrid;
@@ -121,7 +128,11 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions }) => {
                 );
                 
                 return <div className={cn} key={`${rowIdx} ${colIdx}`} onMouseDown={() => selectCell(rowIdx, colIdx)}>
-                    {cell.value}
+                    {cell.value !== null ? cell.value : Array.from({ length: grid.N }, (_, row) => <div className={styles.mark_row}>
+                        {Array.from({ length: grid.N }, (_, col) => <div className={styles.mark_cell}>
+                            {cell.marks[row*grid.N+col] ? (row*grid.N+col)+1 : ' '}
+                        </div>)}
+                    </div>)}
                 </div>}
             )
         }</div>)}

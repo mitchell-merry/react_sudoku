@@ -1,12 +1,13 @@
+// Static means generated - unchanging
+// Solved means when you press "solve" it was filled in for you
+// Null means either empty or filled by the user (default)
 export type CellState = 'static' | 'solved' | null;
 
 // ICell, IGrid, I Fard, I Shid
 export interface ICell {
     value: number | null;
-    // Static means generated - unchanging
-    // Solved means when you press "solve" it was filled in for you
-    // Null means either empty or filled by the user (default)
     state: CellState;
+    marks: boolean[];
 }
 
 export interface IGrid {
@@ -135,10 +136,13 @@ export const getEmpty = (grid: IGrid): [number, number] | null => {
     }
     return null;
 }
+
+export const getEmptyMarks = (N: number): boolean[] => Array.from({length: N*N}, (_, i) => false);
+
 export const clearGridOfState = (grid: IGrid, state: CellState) => {
     grid.grid.forEach((row, rowIdx) => {
         grid.grid[rowIdx].forEach((cell, colIdx) => {
-            if(grid.grid[rowIdx][colIdx].state === state) grid.grid[rowIdx][colIdx] = {value: null, state: null}; 
+            if(grid.grid[rowIdx][colIdx].state === state) grid.grid[rowIdx][colIdx] = {value: null, state: null, marks: getEmptyMarks(grid.N)}; 
         });
     });
 }
@@ -167,7 +171,8 @@ export const fillGrid = (grid: IGrid, generate: boolean, countAll: boolean): num
     for(const option of options) {
         grid.grid[row][col] = {
             value: option,
-            state: generate ? 'static' : 'solved'
+            state: generate ? 'static' : 'solved',
+            marks: grid.grid[row][col].marks
         };
 
         if(!validGrid(grid)) continue;
@@ -180,7 +185,8 @@ export const fillGrid = (grid: IGrid, generate: boolean, countAll: boolean): num
 
     grid.grid[row][col] = {
         value: null,
-        state: null
+        state: null,
+        marks: grid.grid[row][col].marks
     };
     
     return solutionsFromHere;
@@ -198,12 +204,12 @@ export const generateGrid = (grid: IGrid, emptyCells: number): void => {
 
         // Remove the cell at our first (random) location and store temporarily
         const temp = grid.grid[options[0][0]][options[0][1]].value;
-        grid.grid[options[0][0]][options[0][1]] = {value: null, state: null};
+        grid.grid[options[0][0]][options[0][1]] = {value: null, state: null, marks: getEmptyMarks(grid.N)};
         
         // Not a valid solution
         if(fillGrid(grid, false, true) !== 1) {
             // Restore value if it introduces ambiguity
-            grid.grid[options[0][0]][options[0][1]] = {value: temp, state: 'static'};
+            grid.grid[options[0][0]][options[0][1]] = {value: temp, state: 'static', marks: getEmptyMarks(grid.N)};
         } else {
             // Decrease the number of empty cells (remaining)
             emptyCells--;
@@ -223,7 +229,7 @@ export const instantiateGrid = (N: number): IGrid => {
     return {
         N,
         grid: Array.from({length: N*N}, (_, row) => (
-            Array.from({length: N*N}, (_, col) => ({ value: null, state: null }))
+            Array.from({length: N*N}, (_, col) => ({ value: null, state: null, marks: getEmptyMarks(N) }))
         ))
     }
 }
