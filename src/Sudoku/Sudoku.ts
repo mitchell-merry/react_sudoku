@@ -1,7 +1,7 @@
 // Static means generated - unchanging
 // Solved means when you press "solve" it was filled in for you
 // Null means either empty or filled by the user (default)
-export type CellState = 'static' | 'solved' | null;
+export type CellState = 'static' | 'solved' | 'test' | null;
 
 // ICell, IGrid, I Fard, I Shid
 export interface ICell {

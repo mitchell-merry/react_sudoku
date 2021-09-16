@@ -7,17 +7,20 @@ var classNames = require('classnames');
 export interface ControlsProps {
     N: number;
     controlFunctions: React.MutableRefObject<IControlFunctions>;
-    editMode: boolean;
-    toggleEditMode: () => void;
+    editModeState: [editMode: boolean, toggleEditMode: () => void];
+    testModeState: [testMode: boolean, toggleTestMode: () => void];
 }
 
-export const Controls: React.FC<ControlsProps> = ({ N, controlFunctions, editMode, toggleEditMode }) => {
+export const Controls: React.FC<ControlsProps> = ({ N, controlFunctions, editModeState, testModeState }) => {
+    const [ editMode, toggleEditMode ] = editModeState;
+    const [ testMode, toggleTestMode ] = testModeState;
+
     return <div className={styles.grid}>
         <div className={styles.row}>
             <button className={styles.action_button} onClick={() => controlFunctions.current?.generate && controlFunctions.current.generate()}>Generate</button>
             <button className={styles.action_button} onClick={() => controlFunctions.current?.solve && controlFunctions.current.solve()}>Solve</button>
         </div>
-        <div className={styles.grid}>
+        <div className={styles.row}>
             <FormControlLabel
                 control={
                 <Switch
@@ -28,6 +31,17 @@ export const Controls: React.FC<ControlsProps> = ({ N, controlFunctions, editMod
                 />
                 }
                 label="Edit"
+            />
+            <FormControlLabel
+                control={
+                <Switch
+                    checked={testMode}
+                    onChange={toggleTestMode}
+                    name="checkedB"
+                    color="primary"
+                />
+                }
+                label="Test"
             />
         </div>
         {Array.from({length: N}, (_, numberRow) => <div className={styles.row} key={numberRow}>

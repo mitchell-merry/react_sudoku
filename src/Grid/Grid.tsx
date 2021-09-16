@@ -7,8 +7,8 @@ var classNames = require('classnames');
 export interface GridProps {
     N: number;
     controlFunctions: React.MutableRefObject<IControlFunctions>;
-    editMode: boolean;
-    toggleEditMode: () => void;
+    editModeState: [editMode: boolean, toggleEditMode: () => void];
+    testModeState: [testMode: boolean, toggleTestMode: () => void];
 }
 
 interface ATM { [key: string]: Sudoku.Coordinate }
@@ -20,14 +20,16 @@ const arrowToNeighbour: ATM = {
     'ArrowRight':   [0, 1],
 };
 
-export const Grid: React.FC<GridProps> = ({ N, controlFunctions, editMode, toggleEditMode }) => {
+export const Grid: React.FC<GridProps> = ({ N, controlFunctions, editModeState, testModeState }) => {
     const [ grid, setGrid ] = useState(Sudoku.instantiateGrid(N))
     const [ selectedCell, setSelectedCell ] = useState<Sudoku.Coordinate>([0, 0]);
-    
+    const [ editMode, toggleEditMode ] = editModeState;
+    const [ testMode, toggleTestMode ] = testModeState;
+
     const generateNewGrid = (): void => {
         setGrid(curr => {
             const newGrid = Sudoku.instantiateGrid(curr.N);
-            Sudoku.generateGrid(newGrid, 45);
+            Sudoku.generateGrid(newGrid, 50);
             return newGrid;
         });
     }
@@ -57,6 +59,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions, editMode, toggl
         else if(e.key === 'Delete' || e.key === 'Backspace') setCellValue(selectedCell[0], selectedCell[1], null);
         else if(e.key === ' ') solveGrid(); 
         else if(e.key === 'e') toggleEditMode();
+        else if(e.key === 't') toggleTestMode();
         else {
             prevent  = false;
             // console.log(e.key);
@@ -71,7 +74,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions, editMode, toggl
         document.addEventListener('keydown', handleKeyDown);
 
         return () => document.removeEventListener('keydown', handleKeyDown)
-    }, [ selectedCell, editMode ]);
+    }, [ selectedCell, editMode, testMode ]);
 
     const selectCell = (row: number, col: number): void => {
         setSelectedCell(currentCell => [row, col]);
@@ -86,7 +89,10 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions, editMode, toggl
              if(!editMode) {
                 const currVal = Sudoku.getValueAtCoordinate([row, col], newGrid);
                 if(currVal === value || value === 0) newGrid.grid[row][col].value = null;
-                else newGrid.grid[row][col].value = value;
+                else {
+                    newGrid.grid[row][col].value = value;
+                    newGrid.grid[row][col].state = testMode ? 'test' : null;
+                }
             } else if(value !== null && value !== 0) {
                 newGrid.grid[row][col].marks[value-1] = !newGrid.grid[row][col].marks[value-1];
             }
@@ -124,6 +130,7 @@ export const Grid: React.FC<GridProps> = ({ N, controlFunctions, editMode, toggl
                     // Cell type
                     {[styles.cell_static]: state === 'static'},
                     {[styles.cell_solved]: state === 'solved'},
+                    {[styles.cell_test]: state === 'test'},
                     {[styles.cell_invalid]: state === 'invalid'},
 
                     // Borders

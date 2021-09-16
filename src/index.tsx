@@ -9,13 +9,15 @@ import { IControlFunctions } from './ControlFunctions';
 export const App: React.FC = () => {
   const controlFunctions = useRef<IControlFunctions>({ });
   const [ editMode, setEditMode ] = useState<boolean>(false);
+  const [ testMode, setTestMode ] = useState<boolean>(false);
 
   const toggleEditMode = () => { setEditMode(e => !e); }
+  const toggleTestMode = () => { setTestMode(e => !e); }
   
   const N = 3;
   return <div className={styles.app}>
-    <Grid N={N} controlFunctions={controlFunctions} editMode={editMode} toggleEditMode={toggleEditMode} />
-    <Controls N={N} controlFunctions={controlFunctions} editMode={editMode} toggleEditMode={toggleEditMode} />
+    <Grid N={N} controlFunctions={controlFunctions} editModeState={[editMode, toggleEditMode]} testModeState={[testMode, toggleTestMode]} />
+    <Controls N={N} controlFunctions={controlFunctions} editModeState={[editMode, toggleEditMode]} testModeState={[testMode, toggleTestMode]} />
   </div>
 }
 
